@@ -1,0 +1,30 @@
+# Зависимости
+node_modules/
+
+# Сборка
+dist/
+build/
+
+# Переменные окружения
+.env
+
+# Логи
+logs/
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+
+# Временные файлы
+tmp/
+temp/
+*.tmp
+
+# Docker (данные)
+docker-data/

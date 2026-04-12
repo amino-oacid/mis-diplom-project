@@ -1,0 +1,15 @@
+export { LoginPage } from './LoginPage';
+export { RegisterPage } from './RegisterPage';
+export { DashboardPage } from './DashboardPage';
+export { PatientsPage } from './PatientsPage';
+export { PatientFormPage } from './PatientFormPage';
+export { AppointmentsPage } from './AppointmentsPage';
+export { AppointmentFormPage } from './AppointmentFormPage';
+export { AppointmentDetailPage } from './AppointmentDetailPage';
+export { PrescriptionFormPage } from './PrescriptionFormPage';
+export { InventoryPage } from './InventoryPage';
+export { InventoryFormPage } from './InventoryFormPage';
+export { ReportsPage } from './ReportsPage';
+export { SchedulePage } from './SchedulePage';
+export { PatientCardPage } from './PatientCardPage';
+export { ProfilePage } from './ProfilePage';

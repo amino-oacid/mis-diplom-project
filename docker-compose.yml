@@ -1,0 +1,52 @@
+services:
+  # База данных PostgreSQL
+  postgres:
+    container_name: mis-database
+    image: postgres:17-alpine
+    env_file:
+      - ./backend/.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+
+  # Бэкенд
+  backend:
+    container_name: mis-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
+    networks:
+      - backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+
+  # Фронтенд
+  frontend:
+    container_name: mis-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - frontend
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  frontend:
+  backend:

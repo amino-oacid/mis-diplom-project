@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Build outputs
+build/
+dist/

@@ -1,0 +1,78 @@
+.dashboard-page .page-header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.dashboard-page .page-date {
+  color: var(--color-text-light);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.appointment-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.appointment-card:last-child {
+  border-bottom: none;
+}
+
+.appointment-card-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.appointment-patient-name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.appointment-info {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.appointment-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-sm);
+}
+
+.appointment-time {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.today-appointments .card {
+  padding: 0;
+}
+
+.today-appointments .card-title {
+  padding: var(--spacing-lg);
+  margin: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  color: var(--color-text-light);
+  gap: var(--spacing-md);
+}

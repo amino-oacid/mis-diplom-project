@@ -1,0 +1,230 @@
+.schedule-page .page-header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.schedule-page .page-subtitle {
+  color: var(--color-text-light);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.schedule-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-lg);
+}
+
+.schedule-filter {
+  min-width: 200px;
+}
+
+.week-navigation {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.week-range {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--color-text);
+  min-width: 280px;
+  text-align: center;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: var(--color-bg);
+  border-color: var(--color-text-light);
+}
+
+.schedule-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.schedule-card .section-title {
+  padding: var(--spacing-lg);
+  margin: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.schedule-grid {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+}
+
+.schedule-header {
+  display: grid;
+  grid-template-columns: 80px repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.time-header {
+  padding: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-light);
+}
+
+.day-header {
+  padding: var(--spacing-md);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  border-left: 1px solid var(--color-border);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.day-header.today {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.schedule-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-row {
+  display: grid;
+  grid-template-columns: 80px repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--color-border);
+}
+
+.schedule-row:last-child {
+  border-bottom: none;
+}
+
+.time-cell {
+  padding: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-light);
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slot-cell {
+  padding: var(--spacing-sm);
+  border-left: 1px solid var(--color-border);
+  min-height: 60px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  overflow: hidden;
+}
+
+.slot-cell:hover {
+  background: var(--color-bg);
+}
+
+.slot-cell.today {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.slot-cell.today:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.free-slot {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}
+
+.appointment-slot {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-primary-light);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.appointment-slot:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.slot-patient {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slot-service {
+  display: block;
+  font-size: 10px;
+  color: var(--color-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.schedule-card .loading-state {
+  padding: var(--spacing-xl) * 2;
+}
+
+@media (max-width: 1200px) {
+  .schedule-header,
+  .schedule-row {
+    grid-template-columns: 60px repeat(7, minmax(0, 1fr));
+  }
+
+  .day-header,
+  .time-cell {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-sm);
+  }
+
+  .slot-cell {
+    min-height: 50px;
+    padding: 4px;
+  }
+
+  .appointment-slot {
+    padding: 4px 6px;
+  }
+
+  .slot-patient {
+    font-size: 10px;
+  }
+
+  .slot-service {
+    font-size: 9px;
+  }
+}

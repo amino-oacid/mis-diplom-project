@@ -1,0 +1,9 @@
+export { authModel } from './auth.model';
+export { patientModel } from './patient.model';
+export { appointmentModel } from './appointment.model';
+export { doctorModel } from './doctor.model';
+export { serviceModel } from './service.model';
+export { medicalRecordModel } from './medical-record.model';
+export { prescriptionModel } from './prescription.model';
+export { inventoryModel } from './inventory.model';
+export { reportModel } from './report.model';
