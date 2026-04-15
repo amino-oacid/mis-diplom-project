@@ -22,12 +22,6 @@ export class DoctorsController {
     return { success: true, data: doctors };
   }
 
-  @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    const doctor = await this.doctorsService.findOne(id);
-    return { success: true, data: doctor };
-  }
-
   @Put(':id')
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateDoctorDto) {
     const doctor = await this.doctorsService.update(id, dto);

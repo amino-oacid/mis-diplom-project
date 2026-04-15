@@ -10,9 +10,4 @@ export const serviceModel = {
     const response = await api.get<{ success: boolean; data: Service[] }>('/services');
     return response.data.data || [];
   },
-
-  async getById(id: number): Promise<Service> {
-    const response = await api.get<{ success: boolean; data: Service }>(`/services/${id}`);
-    return response.data.data;
-  },
 };

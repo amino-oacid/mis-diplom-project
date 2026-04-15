@@ -17,11 +17,6 @@ export const doctorModel = {
     return response.data.data || [];
   },
 
-  async getById(id: number): Promise<DoctorInfo> {
-    const response = await api.get<{ success: boolean; data: DoctorInfo }>(`/doctors/${id}`);
-    return response.data.data;
-  },
-
   async update(id: number, data: UpdateDoctorRequest): Promise<DoctorInfo> {
     const response = await api.put<{ success: boolean; data: DoctorInfo }>(`/doctors/${id}`, data);
     return response.data.data;

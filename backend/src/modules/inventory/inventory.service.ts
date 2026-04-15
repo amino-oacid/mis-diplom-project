@@ -221,27 +221,6 @@ export class InventoryService {
     });
   }
 
-  async batchExpense(
-    items: { inventoryId: number; quantity: number }[],
-    userId: number,
-    appointmentId?: number,
-  ): Promise<Inventory[]> {
-    const results: Inventory[] = [];
-
-    for (const item of items) {
-      const result = await this.expense(
-        item.inventoryId,
-        item.quantity,
-        userId,
-        appointmentId,
-        'Массовое списание',
-      );
-      results.push(result);
-    }
-
-    return results;
-  }
-
   async getLog(filters?: InventoryLogFiltersDto) {
     const queryBuilder = this.logRepository
       .createQueryBuilder('log')

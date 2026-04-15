@@ -66,16 +66,6 @@ export const inventoryModel = {
     return response.data.data;
   },
 
-  async getLowStock(): Promise<InventoryItem[]> {
-    const response = await api.get<{ success: boolean; data: InventoryItem[] }>('/inventory/low-stock');
-    return response.data.data || [];
-  },
-
-  async getExpiring(): Promise<InventoryItem[]> {
-    const response = await api.get<{ success: boolean; data: InventoryItem[] }>('/inventory/expiring');
-    return response.data.data || [];
-  },
-
   async getLog(params?: { inventoryId?: number; limit?: number }): Promise<InventoryLog[]> {
     const response = await api.get<{ success: boolean; data: InventoryLog[] }>('/inventory/log', { params });
     return response.data.data || [];

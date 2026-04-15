@@ -10,12 +10,12 @@ export class ReportFiltersDto {
   endDate?: string;
 
   @IsOptional()
-  @IsIn(['json', 'excel', 'pdf'], { message: 'Формат должен быть json, excel или pdf' })
-  format?: string;
+  @IsIn(['excel', 'pdf'], { message: 'Формат должен быть excel или pdf' })
+  format?: 'excel' | 'pdf';
 }
 
 export class InventoryReportFiltersDto {
   @IsOptional()
-  @IsIn(['json', 'excel', 'pdf'], { message: 'Формат должен быть json, excel или pdf' })
-  format?: string;
+  @IsIn(['excel', 'pdf'], { message: 'Формат должен быть excel или pdf' })
+  format?: 'excel' | 'pdf';
 }

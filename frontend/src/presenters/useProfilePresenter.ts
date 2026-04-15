@@ -218,7 +218,7 @@ export const useProfilePresenter = () => {
     setIsSaving(true);
 
     try {
-      const updatedUser = await authModel.updateProfile({
+      await authModel.updateProfile({
         lastName: formData.lastName,
         firstName: formData.firstName,
         middleName: formData.middleName || undefined,

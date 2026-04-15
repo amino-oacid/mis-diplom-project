@@ -21,7 +21,6 @@ import { InventoryFiltersDto } from './dto/inventory-filters.dto';
 import { InventoryIncomeDto } from './dto/inventory-income.dto';
 import { InventoryExpenseDto } from './dto/inventory-expense.dto';
 import { InventoryLogFiltersDto } from './dto/inventory-log-filters.dto';
-import { InventoryBatchExpenseDto } from './dto/inventory-batch-expense.dto';
 import { AuthenticatedRequest } from '../../common/types/request.types';
 
 @Controller('inventory')
@@ -39,18 +38,6 @@ export class InventoryController {
   async getStats() {
     const stats = await this.inventoryService.getStats();
     return { success: true, data: stats };
-  }
-
-  @Get('low-stock')
-  async getLowStock() {
-    const items = await this.inventoryService.getLowStock();
-    return { success: true, data: items };
-  }
-
-  @Get('expiring')
-  async getExpiring() {
-    const items = await this.inventoryService.getExpiring();
-    return { success: true, data: items };
   }
 
   @Get('log')
@@ -87,21 +74,6 @@ export class InventoryController {
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.inventoryService.remove(id);
     return { success: true, message: 'Позиция удалена' };
-  }
-
-  @Post('batch-expense')
-  @UseGuards(RolesGuard)
-  @Roles('admin')
-  async batchExpense(
-    @Body() dto: InventoryBatchExpenseDto,
-    @Req() req: AuthenticatedRequest,
-  ) {
-    const items = await this.inventoryService.batchExpense(
-      dto.items,
-      req.user.userId,
-      dto.appointmentId,
-    );
-    return { success: true, message: 'Массовое списание оформлено', data: items };
   }
 
   @Post(':id/income')
