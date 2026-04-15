@@ -49,9 +49,9 @@ describe('Склад - Форма создания/просмотра', () => {
         cy.get('input[name="name"]').type(inventory.newItem.name);
         cy.get('select[name="type"]').select('medication');
         cy.get('select[name="unit"]').select('шт');
-        cy.get('input[name="quantity"]').clear().type('{selectall}' + String(inventory.newItem.quantity));
-        cy.get('input[name="minQuantity"]').clear().type('{selectall}' + String(inventory.newItem.minQuantity));
-        cy.get('input[name="purchasePrice"]').clear().type('{selectall}' + String(inventory.newItem.purchasePrice));
+        cy.get('input[name="quantity"]').should('not.be.disabled').clear().type('{selectall}' + String(inventory.newItem.quantity));
+        cy.get('input[name="minQuantity"]').should('not.be.disabled').clear().type('{selectall}' + String(inventory.newItem.minQuantity));
+        cy.get('input[name="purchasePrice"]').should('not.be.disabled').clear().type('{selectall}' + String(inventory.newItem.purchasePrice));
 
         cy.get('button[type="submit"]').click();
 
