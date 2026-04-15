@@ -1,0 +1,166 @@
+{
+  "list": {
+    "data": [
+      {
+        "id": 1,
+        "patientId": 1,
+        "doctorId": 1,
+        "serviceId": 1,
+        "appointmentDate": "2024-01-15",
+        "startTime": "09:00:00",
+        "endTime": "09:30:00",
+        "status": "scheduled",
+        "complaints": null,
+        "diagnosis": null,
+        "totalCost": 2000,
+        "createdAt": "2024-01-10T10:00:00Z",
+        "updatedAt": "2024-01-10T10:00:00Z",
+        "patient": {
+          "id": 1,
+          "fullName": "Петров Петр Петрович"
+        },
+        "doctor": {
+          "id": 1,
+          "user": {
+            "fullName": "Иванов Иван Иванович"
+          },
+          "specialization": "Терапевт"
+        },
+        "service": {
+          "id": 1,
+          "name": "Первичный приём терапевта",
+          "price": 2000
+        }
+      },
+      {
+        "id": 2,
+        "patientId": 2,
+        "doctorId": 1,
+        "serviceId": 2,
+        "appointmentDate": "2024-01-15",
+        "startTime": "10:00:00",
+        "endTime": "10:30:00",
+        "status": "completed",
+        "complaints": "Головная боль",
+        "diagnosis": "ОРВИ",
+        "totalCost": 1500,
+        "createdAt": "2024-01-09T10:00:00Z",
+        "updatedAt": "2024-01-15T10:35:00Z",
+        "patient": {
+          "id": 2,
+          "fullName": "Сидорова Анна Ивановна"
+        },
+        "doctor": {
+          "id": 1,
+          "user": {
+            "fullName": "Иванов Иван Иванович"
+          },
+          "specialization": "Терапевт"
+        },
+        "service": {
+          "id": 2,
+          "name": "Повторный приём терапевта",
+          "price": 1500
+        }
+      },
+      {
+        "id": 3,
+        "patientId": 3,
+        "doctorId": 1,
+        "serviceId": 1,
+        "appointmentDate": "2024-01-16",
+        "startTime": "11:00:00",
+        "endTime": "11:30:00",
+        "status": "in_progress",
+        "complaints": "Боль в спине",
+        "diagnosis": null,
+        "totalCost": 2000,
+        "createdAt": "2024-01-12T10:00:00Z",
+        "updatedAt": "2024-01-16T11:05:00Z",
+        "patient": {
+          "id": 3,
+          "fullName": "Козлов Алексей Сергеевич"
+        },
+        "doctor": {
+          "id": 1,
+          "user": {
+            "fullName": "Иванов Иван Иванович"
+          },
+          "specialization": "Терапевт"
+        },
+        "service": {
+          "id": 1,
+          "name": "Первичный приём терапевта",
+          "price": 2000
+        }
+      }
+    ],
+    "total": 3,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 1
+  },
+  "todayAppointments": [
+    {
+      "id": 1,
+      "patientId": 1,
+      "appointmentDate": "2024-01-15",
+      "startTime": "09:00:00",
+      "status": "scheduled",
+      "patient": {
+        "id": 1,
+        "fullName": "Петров Петр Петрович"
+      },
+      "service": {
+        "name": "Первичный приём терапевта"
+      }
+    }
+  ],
+  "timeSlots": [
+    {
+      "startTime": "09:00:00",
+      "endTime": "09:30:00",
+      "available": true
+    },
+    {
+      "startTime": "09:30:00",
+      "endTime": "10:00:00",
+      "available": true
+    },
+    {
+      "startTime": "10:00:00",
+      "endTime": "10:30:00",
+      "available": false
+    },
+    {
+      "startTime": "10:30:00",
+      "endTime": "11:00:00",
+      "available": true
+    },
+    {
+      "startTime": "11:00:00",
+      "endTime": "11:30:00",
+      "available": true
+    },
+    {
+      "startTime": "11:30:00",
+      "endTime": "12:00:00",
+      "available": true
+    },
+    {
+      "startTime": "14:00:00",
+      "endTime": "14:30:00",
+      "available": true
+    },
+    {
+      "startTime": "14:30:00",
+      "endTime": "15:00:00",
+      "available": true
+    },
+    {
+      "startTime": "15:00:00",
+      "endTime": "15:30:00",
+      "available": true
+    }
+  ]
+}

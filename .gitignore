@@ -28,3 +28,7 @@ temp/
 
 # Docker (данные)
 docker-data/
+
+# Cypress
+frontend/cypress/screenshots/
+frontend/cypress/videos/

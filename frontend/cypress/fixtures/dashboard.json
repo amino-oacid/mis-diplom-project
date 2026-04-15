@@ -1,0 +1,38 @@
+{
+  "summary": {
+    "todayAppointments": 5,
+    "weekAppointments": 23,
+    "totalPatients": 156,
+    "newPatientsThisMonth": 12,
+    "completedAppointmentsToday": 3,
+    "scheduledAppointmentsToday": 2,
+    "lowStockItems": 2,
+    "monthlyRevenue": 125000
+  },
+  "recentAppointments": [
+    {
+      "id": 1,
+      "appointmentDate": "2024-01-15",
+      "startTime": "09:00:00",
+      "status": "scheduled",
+      "patient": {
+        "fullName": "Петров Петр Петрович"
+      },
+      "service": {
+        "name": "Первичный приём терапевта"
+      }
+    },
+    {
+      "id": 2,
+      "appointmentDate": "2024-01-15",
+      "startTime": "10:00:00",
+      "status": "completed",
+      "patient": {
+        "fullName": "Сидорова Анна Ивановна"
+      },
+      "service": {
+        "name": "Повторный приём терапевта"
+      }
+    }
+  ]
+}

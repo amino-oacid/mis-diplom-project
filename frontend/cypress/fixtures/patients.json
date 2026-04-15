@@ -1,0 +1,79 @@
+{
+  "list": {
+    "data": [
+      {
+        "id": 1,
+        "lastName": "Петров",
+        "firstName": "Петр",
+        "middleName": "Петрович",
+        "fullName": "Петров Петр Петрович",
+        "birthDate": "1985-05-15",
+        "gender": "male",
+        "phone": "+7 (999) 123-45-67",
+        "email": "petrov@example.com",
+        "address": "г. Москва, ул. Ленина, д. 10",
+        "insurancePolicy": "1234567890123456",
+        "createdAt": "2024-01-01T10:00:00Z",
+        "updatedAt": "2024-01-01T10:00:00Z"
+      },
+      {
+        "id": 2,
+        "lastName": "Сидорова",
+        "firstName": "Анна",
+        "middleName": "Ивановна",
+        "fullName": "Сидорова Анна Ивановна",
+        "birthDate": "1990-08-20",
+        "gender": "female",
+        "phone": "+7 (999) 987-65-43",
+        "email": "sidorova@example.com",
+        "address": "г. Москва, ул. Пушкина, д. 5",
+        "insurancePolicy": "6543210987654321",
+        "createdAt": "2024-01-02T11:00:00Z",
+        "updatedAt": "2024-01-02T11:00:00Z"
+      },
+      {
+        "id": 3,
+        "lastName": "Козлов",
+        "firstName": "Алексей",
+        "middleName": "Сергеевич",
+        "fullName": "Козлов Алексей Сергеевич",
+        "birthDate": "1978-12-03",
+        "gender": "male",
+        "phone": "+7 (999) 555-55-55",
+        "email": "kozlov@example.com",
+        "address": "г. Санкт-Петербург, пр. Невский, д. 100",
+        "insurancePolicy": "9876543210123456",
+        "createdAt": "2024-01-03T09:00:00Z",
+        "updatedAt": "2024-01-03T09:00:00Z"
+      }
+    ],
+    "total": 3,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 1
+  },
+  "newPatient": {
+    "lastName": "Новиков",
+    "firstName": "Николай",
+    "middleName": "Николаевич",
+    "birthDate": "1995-03-10",
+    "gender": "male",
+    "phone": "+7 (999) 111-22-33",
+    "email": "novikov@example.com",
+    "address": "г. Москва, ул. Новая, д. 1"
+  },
+  "createdPatient": {
+    "id": 4,
+    "lastName": "Новиков",
+    "firstName": "Николай",
+    "middleName": "Николаевич",
+    "fullName": "Новиков Николай Николаевич",
+    "birthDate": "1995-03-10",
+    "gender": "male",
+    "phone": "+7 (999) 111-22-33",
+    "email": "novikov@example.com",
+    "address": "г. Москва, ул. Новая, д. 1",
+    "createdAt": "2024-01-10T10:00:00Z",
+    "updatedAt": "2024-01-10T10:00:00Z"
+  }
+}

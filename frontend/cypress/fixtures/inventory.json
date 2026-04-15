@@ -1,0 +1,91 @@
+{
+  "list": {
+    "data": [
+      {
+        "id": 1,
+        "name": "Парацетамол 500мг",
+        "type": "medication",
+        "quantity": 150,
+        "minQuantity": 50,
+        "unit": "шт",
+        "purchasePrice": 25,
+        "expiryDate": "2025-06-01",
+        "description": "Жаропонижающее и обезболивающее средство",
+        "createdAt": "2024-01-01T10:00:00Z",
+        "updatedAt": "2024-01-01T10:00:00Z"
+      },
+      {
+        "id": 2,
+        "name": "Бинт стерильный 7x14",
+        "type": "consumable",
+        "quantity": 30,
+        "minQuantity": 20,
+        "unit": "шт",
+        "purchasePrice": 45,
+        "expiryDate": "2026-01-01",
+        "description": "Стерильный бинт для перевязок",
+        "createdAt": "2024-01-02T10:00:00Z",
+        "updatedAt": "2024-01-02T10:00:00Z"
+      },
+      {
+        "id": 3,
+        "name": "Шприц одноразовый 5мл",
+        "type": "consumable",
+        "quantity": 15,
+        "minQuantity": 50,
+        "unit": "шт",
+        "purchasePrice": 10,
+        "expiryDate": "2025-12-01",
+        "description": "Одноразовый шприц для инъекций",
+        "createdAt": "2024-01-03T10:00:00Z",
+        "updatedAt": "2024-01-03T10:00:00Z"
+      },
+      {
+        "id": 4,
+        "name": "Тонометр электронный",
+        "type": "equipment",
+        "quantity": 5,
+        "minQuantity": 2,
+        "unit": "шт",
+        "purchasePrice": 3500,
+        "expiryDate": null,
+        "description": "Электронный прибор для измерения давления",
+        "createdAt": "2024-01-04T10:00:00Z",
+        "updatedAt": "2024-01-04T10:00:00Z"
+      }
+    ],
+    "total": 4,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 1
+  },
+  "stats": {
+    "totalItems": 4,
+    "totalValue": 18750,
+    "lowStockCount": 2,
+    "expiringCount": 1
+  },
+  "newItem": {
+    "name": "Ибупрофен 200мг",
+    "type": "medication",
+    "quantity": 100,
+    "minQuantity": 30,
+    "unit": "шт",
+    "purchasePrice": 35,
+    "expiryDate": "2025-08-01",
+    "description": "Противовоспалительное средство"
+  },
+  "createdItem": {
+    "id": 5,
+    "name": "Ибупрофен 200мг",
+    "type": "medication",
+    "quantity": 100,
+    "minQuantity": 30,
+    "unit": "шт",
+    "purchasePrice": 35,
+    "expiryDate": "2025-08-01",
+    "description": "Противовоспалительное средство",
+    "createdAt": "2024-01-10T10:00:00Z",
+    "updatedAt": "2024-01-10T10:00:00Z"
+  }
+}

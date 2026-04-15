@@ -1,0 +1,44 @@
+{
+  "list": [
+    {
+      "id": 1,
+      "code": "THER-001",
+      "name": "Первичный приём терапевта",
+      "description": "Первичный приём врача-терапевта",
+      "category": "Терапия",
+      "duration": 30,
+      "durationMinutes": 30,
+      "price": 2000
+    },
+    {
+      "id": 2,
+      "code": "THER-002",
+      "name": "Повторный приём терапевта",
+      "description": "Повторный приём врача-терапевта",
+      "category": "Терапия",
+      "duration": 20,
+      "durationMinutes": 20,
+      "price": 1500
+    },
+    {
+      "id": 3,
+      "code": "DIAG-001",
+      "name": "УЗИ брюшной полости",
+      "description": "Ультразвуковое исследование органов брюшной полости",
+      "category": "Диагностика",
+      "duration": 30,
+      "durationMinutes": 30,
+      "price": 2500
+    },
+    {
+      "id": 4,
+      "code": "LAB-001",
+      "name": "Общий анализ крови",
+      "description": "Клинический анализ крови",
+      "category": "Лаборатория",
+      "duration": 10,
+      "durationMinutes": 10,
+      "price": 500
+    }
+  ]
+}
