@@ -26,5 +26,6 @@ async function bootstrap() {
   
   console.log(`Сервер запущен на порту ${PORT || 3001}`);
   console.log(`Окружение: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Хост бд: ${process.env.POSTGRES_HOST}`);
 }
 bootstrap();
