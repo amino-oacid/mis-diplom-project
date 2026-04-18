@@ -2,7 +2,9 @@ import React from 'react';
 import { Button, Input } from '../components/common';
 import { useReportsPresenter } from '../presenters/useReportsPresenter';
 import { DownloadIcon, CalendarIcon } from '../components/icons';
+import { appointmentStatusLabels } from '../types/appointment.types';
 import '../styles/reports.css';
+import '../styles/appointments.css';
 
 /**
  * Страница отчетов
@@ -12,7 +14,6 @@ export const ReportsPage: React.FC = () => {
     activeReport,
     params,
     appointmentsReport,
-    revenueReport,
     inventoryReport,
     isLoading,
     isExporting,
@@ -23,14 +24,6 @@ export const ReportsPage: React.FC = () => {
     exportPdf,
     exportExcel,
   } = useReportsPresenter();
-
-  const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('ru-RU', {
-      style: 'currency',
-      currency: 'RUB',
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
 
   return (
     <div className="page reports-page">
@@ -94,12 +87,6 @@ export const ReportsPage: React.FC = () => {
           Приёмы
         </button>
         <button
-          className={`tab ${activeReport === 'revenue' ? 'active' : ''}`}
-          onClick={() => handleReportChange('revenue')}
-        >
-          Доходы
-        </button>
-        <button
           className={`tab ${activeReport === 'inventory' ? 'active' : ''}`}
           onClick={() => handleReportChange('inventory')}
         >
@@ -115,6 +102,12 @@ export const ReportsPage: React.FC = () => {
           </div>
         ) : (
           <>
+            {activeReport === 'appointments' && !appointmentsReport && (
+              <div className="empty-state">
+                <p>Выберите период и нажмите «Применить» для загрузки отчёта</p>
+              </div>
+            )}
+
             {activeReport === 'appointments' && appointmentsReport && (
               <div className="report-table-container">
                 <table className="report-table">
@@ -122,18 +115,37 @@ export const ReportsPage: React.FC = () => {
                     <tr>
                       <th>Дата</th>
                       <th>Услуга</th>
+                      <th>Цена</th>
+                      <th>Статус</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {appointmentsReport.appointments?.map((appointment, idx) => (
-                      <tr key={idx}>
-                        <td>{new Date(appointment.date).toLocaleDateString('ru-RU')}</td>
-                        <td>{appointment.service}</td>
-                      </tr>
-                    ))}
+                    {appointmentsReport.appointments?.map((appointment, idx) => {
+                      const getStatusClass = (status: string): string => {
+                        switch (status) {
+                          case 'scheduled': return 'badge-success';
+                          case 'in_progress': return 'badge-warning';
+                          case 'completed': return 'badge-success';
+                          case 'cancelled': return 'badge-danger';
+                          default: return 'badge-info';
+                        }
+                      };
+                      return (
+                        <tr key={idx}>
+                          <td>{new Date(appointment.date).toLocaleDateString('ru-RU')}</td>
+                          <td>{appointment.service}</td>
+                          <td>{appointment.cost?.toLocaleString('ru-RU')} ₽</td>
+                          <td>
+                            <span className={`badge ${getStatusClass(appointment.status)}`}>
+                              {appointmentStatusLabels[appointment.status as keyof typeof appointmentStatusLabels] || appointment.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                     {(!appointmentsReport.appointments || appointmentsReport.appointments.length === 0) && (
                       <tr>
-                        <td colSpan={2} className="empty-cell">Нет данных о приёмах</td>
+                        <td colSpan={4} className="empty-cell">Нет данных о приёмах</td>
                       </tr>
                     )}
                   </tbody>
@@ -141,31 +153,9 @@ export const ReportsPage: React.FC = () => {
               </div>
             )}
 
-            {activeReport === 'revenue' && revenueReport && (
-              <div className="report-table-container">
-                <table className="report-table">
-                  <thead>
-                    <tr>
-                      <th>Период</th>
-                      <th>Приёмы</th>
-                      <th>Доход</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {revenueReport.byPeriod?.map((period, idx) => (
-                      <tr key={idx}>
-                        <td>{period.period}</td>
-                        <td>{period.count}</td>
-                        <td>{formatPrice(period.revenue)}</td>
-                      </tr>
-                    ))}
-                    {(!revenueReport.byPeriod || revenueReport.byPeriod.length === 0) && (
-                      <tr>
-                        <td colSpan={3} className="empty-cell">Нет данных о доходах</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+            {activeReport === 'inventory' && !inventoryReport && (
+              <div className="empty-state">
+                <p>Нажмите «Применить» для загрузки отчёта по складу</p>
               </div>
             )}
 
@@ -174,26 +164,38 @@ export const ReportsPage: React.FC = () => {
                 <table className="report-table">
                   <thead>
                     <tr>
+                      <th>Дата</th>
                       <th>Наименование</th>
-                      <th>Тип</th>
-                      <th>Израсходовано</th>
+                      <th>Операция</th>
+                      <th>Кол-во</th>
                       <th>Остаток</th>
+                      <th>Причина</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {inventoryReport.lowStock?.map((item, idx) => (
-                      <tr key={idx}>
-                        <td>{item.name}</td>
-                        <td>Медикамент</td>
-                        <td>—</td>
-                        <td className={item.quantity <= item.minQuantity ? 'quantity-low' : ''}>
-                          {item.quantity} {item.unit || 'шт'}
-                        </td>
-                      </tr>
-                    ))}
-                    {(!inventoryReport.lowStock || inventoryReport.lowStock.length === 0) && (
+                    {inventoryReport.movements?.map((movement, idx) => {
+                      const operationLabels: Record<string, string> = {
+                        income: 'Приход',
+                        expense: 'Расход',
+                      };
+                      return (
+                        <tr key={idx}>
+                          <td>{new Date(movement.date).toLocaleDateString('ru-RU')}</td>
+                          <td>{movement.itemName}</td>
+                          <td>
+                            <span className={`operation-badge operation-${movement.operationType}`}>
+                              {operationLabels[movement.operationType] || movement.operationType}
+                            </span>
+                          </td>
+                          <td>{movement.operationType === 'income' ? '+' : '-'}{movement.quantity}</td>
+                          <td>{movement.quantityAfter}</td>
+                          <td>{movement.reason || '—'}</td>
+                        </tr>
+                      );
+                    })}
+                    {(!inventoryReport.movements || inventoryReport.movements.length === 0) && (
                       <tr>
-                        <td colSpan={4} className="empty-cell">Нет данных о расходе материалов</td>
+                        <td colSpan={6} className="empty-cell">Нет данных о движении склада</td>
                       </tr>
                     )}
                   </tbody>

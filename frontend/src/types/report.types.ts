@@ -81,31 +81,6 @@ export interface AppointmentsReport {
   }[];
 }
 
-export interface RevenueReport {
-  summary: {
-    totalRevenue: number;
-    totalAppointments: number;
-    averageCheck: number;
-  };
-  byPeriod: {
-    period: string;
-    revenue: number;
-    count: number;
-  }[];
-  topDoctors: {
-    id: number;
-    name: string;
-    revenue: number;
-    count: number;
-  }[];
-  topServices: {
-    id: number;
-    name: string;
-    revenue: number;
-    count: number;
-  }[];
-}
-
 export interface InventoryReport {
   summary: {
     totalItems: number;
@@ -130,5 +105,23 @@ export interface InventoryReport {
     name: string;
     expiryDate: string;
     quantity: number;
+  }[];
+  items?: {
+    id: number;
+    name: string;
+    type: string;
+    quantity: number;
+    minQuantity: number;
+    unit?: string;
+  }[];
+  movements?: {
+    id: number;
+    date: string;
+    itemName: string;
+    operationType: 'income' | 'expense';
+    quantity: number;
+    quantityAfter: number;
+    reason: string | null;
+    performerName: string;
   }[];
 }

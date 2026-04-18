@@ -3,7 +3,6 @@ import {
   ReportParams,
   DashboardSummary,
   AppointmentsReport,
-  RevenueReport,
   InventoryReport,
 } from '../types/report.types';
 
@@ -19,12 +18,11 @@ export const reportModel = {
   },
 
   async getAppointmentsReport(params?: ReportParams): Promise<AppointmentsReport> {
-    const response = await api.get<{ success: boolean; data: AppointmentsReport }>('/reports/appointments', { params });
-    return response.data.data;
-  },
-
-  async getRevenueReport(params?: ReportParams): Promise<RevenueReport> {
-    const response = await api.get<{ success: boolean; data: RevenueReport }>('/reports/revenue', { params });
+    const queryParams = params ? {
+      startDate: params.dateFrom || undefined,
+      endDate: params.dateTo || undefined,
+    } : undefined;
+    const response = await api.get<{ success: boolean; data: AppointmentsReport }>('/reports/appointments', { params: queryParams });
     return response.data.data;
   },
 
@@ -34,12 +32,17 @@ export const reportModel = {
   },
 
   async exportReport(
-    type: 'appointments' | 'revenue' | 'inventory',
+    type: 'appointments' | 'inventory',
     format: 'pdf' | 'excel',
     params?: Omit<ReportParams, 'format'>
   ): Promise<Blob> {
+    const queryParams = {
+      format,
+      startDate: params?.dateFrom || undefined,
+      endDate: params?.dateTo || undefined,
+    };
     const response = await api.get(`/reports/${type}`, {
-      params: { ...params, format },
+      params: queryParams,
       responseType: 'blob',
     });
     return response.data;

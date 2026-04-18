@@ -12,9 +12,12 @@ import { AxiosError } from 'axios';
 // Режим ввода назначения
 type PrescriptionMode = 'inventory' | 'manual';
 
+// Счётчик для генерации уникальных ID
+let idCounter = 0;
+
 // Интерфейс для одного назначения в форме
 interface PrescriptionItem {
-  id: string;
+  id: number;
   mode: PrescriptionMode; 
   inventoryId?: number;
   quantity?: number; 
@@ -36,7 +39,7 @@ export const usePrescriptionFormPresenter = () => {
 
   // Начальный элемент
   const createEmptyItem = (): PrescriptionItem => ({
-    id: crypto.randomUUID(),
+    id: ++idCounter,
     mode: 'inventory', // По умолчанию - со склада
     inventoryId: undefined,
     quantity: undefined,
@@ -91,7 +94,7 @@ export const usePrescriptionFormPresenter = () => {
   /**
    * Удаление назначения
    */
-  const removePrescription = useCallback((id: string) => {
+  const removePrescription = useCallback((id: number) => {
     setPrescriptions((prev) => {
       if (prev.length === 1) return prev;
       return prev.filter((p) => p.id !== id);
@@ -101,7 +104,7 @@ export const usePrescriptionFormPresenter = () => {
   /**
    * Смена режима ввода (склад / ручной)
    */
-  const handleModeChange = useCallback((id: string, mode: PrescriptionMode) => {
+  const handleModeChange = useCallback((id: number, mode: PrescriptionMode) => {
     setPrescriptions((prev) =>
       prev.map((p) =>
         p.id === id
@@ -122,7 +125,7 @@ export const usePrescriptionFormPresenter = () => {
    * Обработка изменения поля назначения
    */
   const handleItemChange = useCallback(
-    (id: string, field: keyof Omit<PrescriptionItem, 'id' | 'mode'>) =>
+    (id: number, field: keyof Omit<PrescriptionItem, 'id' | 'mode'>) =>
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const rawValue = e.target.value;
         // Преобразуем значение в число для числовых полей

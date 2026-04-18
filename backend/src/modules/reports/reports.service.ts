@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Appointment, AppointmentStatus } from '../appointments/entities/appointment.entity';
 import { Patient } from '../patients/entities/patient.entity';
 import { Inventory } from '../inventory/entities/inventory.entity';
+import { InventoryLog } from '../inventory/entities/inventory-log.entity';
 import { PDFDocument } from 'pdf-lib';
 import * as fontkit from '@pdf-lib/fontkit';
 import * as ExcelJS from 'exceljs';
@@ -19,6 +20,8 @@ export class ReportsService {
     private patientRepository: Repository<Patient>,
     @InjectRepository(Inventory)
     private inventoryRepository: Repository<Inventory>,
+    @InjectRepository(InventoryLog)
+    private inventoryLogRepository: Repository<InventoryLog>,
   ) {}
 
   async getSummary() {
@@ -131,7 +134,16 @@ export class ReportsService {
   }
 
   async getInventoryReport() {
-    const items = await this.inventoryRepository.find();
+    const [items, logs] = await Promise.all([
+      this.inventoryRepository.find(),
+      this.inventoryLogRepository
+        .createQueryBuilder('log')
+        .leftJoinAndSelect('log.inventory', 'inventory')
+        .leftJoinAndSelect('log.performer', 'performer')
+        .orderBy('log.performedAt', 'DESC')
+        .limit(100)
+        .getMany(),
+    ]);
 
     const totalItems = items.length;
     const totalValue = items.reduce((sum, i) => sum + i.quantity * Number(i.purchasePrice || 0), 0);
@@ -178,6 +190,28 @@ export class ReportsService {
       quantity: i.quantity,
     }));
 
+    // Все позиции склада
+    const allItems = items.map((i) => ({
+      id: i.id,
+      name: i.name,
+      type: i.type,
+      quantity: i.quantity,
+      minQuantity: i.minQuantity,
+      unit: i.unit,
+    }));
+
+    // Журнал движений
+    const movements = logs.map((log) => ({
+      id: log.id,
+      date: log.performedAt,
+      itemName: log.inventory?.name || 'Неизвестно',
+      operationType: log.operationType,
+      quantity: log.quantity,
+      quantityAfter: log.quantityAfter,
+      reason: log.reason,
+      performerName: log.performer?.fullName || 'Неизвестно',
+    }));
+
     return {
       summary: {
         totalItems,
@@ -188,6 +222,8 @@ export class ReportsService {
       byType,
       lowStock,
       expiring,
+      items: allItems,
+      movements,
       // Для совместимости с экспортом
       totalItems,
       totalValue,
@@ -195,133 +231,39 @@ export class ReportsService {
     };
   }
 
-  async getRevenueReport(startDate?: string, endDate?: string) {
-    // Дефолтные значения: последние 30 дней
-    const now = new Date();
-    const defaultEnd = now.toISOString().split('T')[0];
-    const defaultStart = new Date(now.setDate(now.getDate() - 30)).toISOString().split('T')[0];
-
-    const start = startDate || defaultStart;
-    const end = endDate || defaultEnd;
-
-    const appointments = await this.appointmentRepository
-      .createQueryBuilder('a')
-      .leftJoinAndSelect('a.service', 'service')
-      .leftJoinAndSelect('a.doctor', 'doctor')
-      .leftJoinAndSelect('doctor.user', 'user')
-      .where('a.appointmentDate >= :startDate', { startDate: start })
-      .andWhere('a.appointmentDate <= :endDate', { endDate: end })
-      .andWhere('a.status = :status', { status: AppointmentStatus.COMPLETED })
-      .orderBy('a.appointmentDate', 'ASC')
-      .getMany();
-
-    const totalRevenue = appointments.reduce((sum, a) => sum + Number(a.service?.price || 0), 0);
-
-    const byService: Record<string, { count: number; revenue: number }> = {};
-    appointments.forEach((a) => {
-      const serviceName = a.service?.name || 'Без услуги';
-      if (!byService[serviceName]) {
-        byService[serviceName] = { count: 0, revenue: 0 };
-      }
-      byService[serviceName].count++;
-      byService[serviceName].revenue += Number(a.service?.price || 0);
-    });
-
-    const byDoctor: Record<string, { count: number; revenue: number }> = {};
-    appointments.forEach((a) => {
-      const doctorName = a.doctor?.user?.fullName || 'Неизвестно';
-      if (!byDoctor[doctorName]) {
-        byDoctor[doctorName] = { count: 0, revenue: 0 };
-      }
-      byDoctor[doctorName].count++;
-      byDoctor[doctorName].revenue += Number(a.service?.price || 0);
-    });
-
-    // Группировка по периодам (дням)
-    const byPeriodMap: Record<string, { count: number; revenue: number }> = {};
-    appointments.forEach((a) => {
-      const period = String(a.appointmentDate).split('T')[0];
-      if (!byPeriodMap[period]) {
-        byPeriodMap[period] = { count: 0, revenue: 0 };
-      }
-      byPeriodMap[period].count++;
-      byPeriodMap[period].revenue += Number(a.service?.price || 0);
-    });
-
-    const byPeriod = Object.entries(byPeriodMap).map(([period, data]) => ({
-      period,
-      count: data.count,
-      revenue: data.revenue,
-    }));
-
-    // Топ докторов
-    const topDoctors = Object.entries(byDoctor)
-      .map(([name, data], idx) => ({
-        id: idx + 1,
-        name,
-        count: data.count,
-        revenue: data.revenue,
-      }))
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 10);
-
-    // Топ услуг
-    const topServices = Object.entries(byService)
-      .map(([name, data], idx) => ({
-        id: idx + 1,
-        name,
-        count: data.count,
-        revenue: data.revenue,
-      }))
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 10);
-
-    const appointmentsCount = appointments.length;
-    const averageCheck = appointmentsCount > 0 ? totalRevenue / appointmentsCount : 0;
-
-    return {
-      summary: {
-        totalRevenue,
-        totalAppointments: appointmentsCount,
-        averageCheck,
-      },
-      byPeriod,
-      topDoctors,
-      topServices,
-      // Для совместимости с экспортом
-      totalRevenue,
-      byService,
-      byDoctor,
-      appointmentsCount,
-    };
-  }
-
   async exportAppointmentsToExcel(startDate?: string, endDate?: string): Promise<Buffer> {
     const report = await this.getAppointmentsReport(startDate, endDate);
 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Отчёт по приёмам');
+    const statusLabels: Record<string, string> = {
+      scheduled: 'Запланирован',
+      in_progress: 'В процессе',
+      completed: 'Завершён',
+      cancelled: 'Отменён',
+    };
 
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Приёмы');
+
+    // Заголовок
     sheet.addRow(['Отчёт по приёмам']);
     sheet.addRow([`Период: ${startDate || 'последние 30 дней'} - ${endDate || 'сегодня'}`]);
     sheet.addRow([]);
 
-    sheet.addRow(['Статистика']);
-    sheet.addRow(['Всего приёмов', report.total]);
-    sheet.addRow(['Выручка', report.revenue]);
-    sheet.addRow([]);
-
-    sheet.addRow(['По статусам']);
-    sheet.addRow(['Запланировано', report.byStatus.scheduled]);
-    sheet.addRow(['В процессе', report.byStatus.in_progress]);
-    sheet.addRow(['Завершено', report.byStatus.completed]);
-    sheet.addRow(['Отменено', report.byStatus.cancelled]);
-    sheet.addRow([]);
-
-    sheet.addRow(['По врачам']);
-    Object.entries(report.byDoctor).forEach(([doctor, count]) => {
-      sheet.addRow([doctor, count]);
+    // Заголовки таблицы
+    const headerRow = sheet.addRow(['Дата', 'Услуга', 'Цена', 'Статус']);
+    headerRow.font = { bold: true };
+    headerRow.eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
     });
+
+    // Данные
+    report.appointments.forEach((a) => {
+      const date = new Date(a.date).toLocaleDateString('ru-RU');
+      sheet.addRow([date, a.service, a.cost, statusLabels[a.status] || a.status]);
+    });
+
+    // Автоширина колонок
+    sheet.columns.forEach((col) => { col.width = 20; });
 
     const buffer = await workbook.xlsx.writeBuffer();
     return Buffer.from(buffer);
@@ -330,124 +272,63 @@ export class ReportsService {
   async exportAppointmentsToPdf(startDate?: string, endDate?: string): Promise<Buffer> {
     const report = await this.getAppointmentsReport(startDate, endDate);
 
+    const statusLabels: Record<string, string> = {
+      scheduled: 'Запланирован',
+      in_progress: 'В процессе',
+      completed: 'Завершён',
+      cancelled: 'Отменён',
+    };
+
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595, 842]);
+    // Альбомная ориентация для большей ширины
+    let page = pdfDoc.addPage([842, 595]);
     const { font, boldFont } = await this.loadFonts(pdfDoc);
 
-    let y = 800;
-    const lineHeight = 20;
+    let y = 550;
+    const lineHeight = 18;
+    const colWidths = [80, 350, 100, 120]; // Дата, Услуга, Цена, Статус
+    const startX = 50;
 
-    page.drawText('Отчёт по приёмам', { x: 50, y, size: 18, font: boldFont });
-    y -= lineHeight * 2;
+    // Заголовок
+    page.drawText('Отчёт по приёмам', { x: startX, y, size: 16, font: boldFont });
+    y -= lineHeight * 1.5;
 
     const periodStart = startDate || 'последние 30 дней';
     const periodEnd = endDate || 'сегодня';
-    page.drawText(`Период: ${periodStart} - ${periodEnd}`, { x: 50, y, size: 12, font });
+    page.drawText(`Период: ${periodStart} - ${periodEnd}`, { x: startX, y, size: 10, font });
     y -= lineHeight * 2;
 
-    page.drawText('Статистика', { x: 50, y, size: 14, font: boldFont });
+    // Заголовки таблицы
+    const headers = ['Дата', 'Услуга', 'Цена', 'Статус'];
+    let x = startX;
+    headers.forEach((header, i) => {
+      page.drawText(header, { x, y, size: 10, font: boldFont });
+      x += colWidths[i];
+    });
     y -= lineHeight;
-    page.drawText(`Всего приёмов: ${report.total}`, { x: 50, y, size: 11, font });
-    y -= lineHeight;
-    page.drawText(`Выручка: ${report.revenue} руб.`, { x: 50, y, size: 11, font });
-    y -= lineHeight * 2;
 
-    page.drawText('По статусам', { x: 50, y, size: 14, font: boldFont });
-    y -= lineHeight;
-    page.drawText(`Запланировано: ${report.byStatus.scheduled}`, { x: 50, y, size: 11, font });
-    y -= lineHeight;
-    page.drawText(`В процессе: ${report.byStatus.in_progress}`, { x: 50, y, size: 11, font });
-    y -= lineHeight;
-    page.drawText(`Завершено: ${report.byStatus.completed}`, { x: 50, y, size: 11, font });
-    y -= lineHeight;
-    page.drawText(`Отменено: ${report.byStatus.cancelled}`, { x: 50, y, size: 11, font });
-    y -= lineHeight * 2;
-
-    page.drawText('По врачам', { x: 50, y, size: 14, font: boldFont });
-    y -= lineHeight;
-    Object.entries(report.byDoctor).forEach(([doctor, count]) => {
-      if (y > 50) {
-        page.drawText(`${doctor}: ${count}`, { x: 50, y, size: 11, font });
-        y -= lineHeight;
+    // Данные таблицы
+    for (const a of report.appointments) {
+      if (y < 50) {
+        page = pdfDoc.addPage([842, 595]);
+        y = 550;
       }
-    });
 
-    const pdfBytes = await pdfDoc.save();
-    return Buffer.from(pdfBytes);
-  }
+      const date = new Date(a.date).toLocaleDateString('ru-RU');
+      const price = `${a.cost} ₽`;
+      const status = statusLabels[a.status] || a.status;
 
-  async exportRevenueToExcel(startDate?: string, endDate?: string): Promise<Buffer> {
-    const report = await this.getRevenueReport(startDate, endDate);
+      x = startX;
+      page.drawText(date, { x, y, size: 9, font });
+      x += colWidths[0];
+      page.drawText(a.service, { x, y, size: 9, font });
+      x += colWidths[1];
+      page.drawText(price, { x, y, size: 9, font });
+      x += colWidths[2];
+      page.drawText(status, { x, y, size: 9, font });
 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Отчёт по доходам');
-
-    sheet.addRow(['Отчёт по доходам']);
-    sheet.addRow([`Период: ${startDate} - ${endDate}`]);
-    sheet.addRow([]);
-
-    sheet.addRow(['Общая выручка', report.totalRevenue]);
-    sheet.addRow(['Количество приёмов', report.appointmentsCount]);
-    sheet.addRow([]);
-
-    sheet.addRow(['По услугам']);
-    sheet.addRow(['Услуга', 'Количество', 'Выручка']);
-    Object.entries(report.byService).forEach(([service, data]) => {
-      sheet.addRow([service, data.count, data.revenue]);
-    });
-    sheet.addRow([]);
-
-    sheet.addRow(['По врачам']);
-    sheet.addRow(['Врач', 'Количество', 'Выручка']);
-    Object.entries(report.byDoctor).forEach(([doctor, data]) => {
-      sheet.addRow([doctor, data.count, data.revenue]);
-    });
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    return Buffer.from(buffer);
-  }
-
-  async exportRevenueToPdf(startDate?: string, endDate?: string): Promise<Buffer> {
-    const report = await this.getRevenueReport(startDate, endDate);
-
-    const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595, 842]);
-    const { font, boldFont } = await this.loadFonts(pdfDoc);
-
-    let y = 800;
-    const lineHeight = 20;
-
-    page.drawText('Отчёт по доходам', { x: 50, y, size: 18, font: boldFont });
-    y -= lineHeight * 2;
-
-    const periodStart = startDate || 'последние 30 дней';
-    const periodEnd = endDate || 'сегодня';
-    page.drawText(`Период: ${periodStart} - ${periodEnd}`, { x: 50, y, size: 12, font });
-    y -= lineHeight * 2;
-
-    page.drawText(`Общая выручка: ${report.totalRevenue} руб.`, { x: 50, y, size: 14, font: boldFont });
-    y -= lineHeight;
-    page.drawText(`Количество приёмов: ${report.appointmentsCount}`, { x: 50, y, size: 11, font });
-    y -= lineHeight * 2;
-
-    page.drawText('По услугам', { x: 50, y, size: 14, font: boldFont });
-    y -= lineHeight;
-    Object.entries(report.byService).forEach(([service, data]) => {
-      if (y > 50) {
-        page.drawText(`${service}: ${data.count} (${data.revenue} руб.)`, { x: 50, y, size: 11, font });
-        y -= lineHeight;
-      }
-    });
-    y -= lineHeight;
-
-    page.drawText('По врачам', { x: 50, y, size: 14, font: boldFont });
-    y -= lineHeight;
-    Object.entries(report.byDoctor).forEach(([doctor, data]) => {
-      if (y > 50) {
-        page.drawText(`${doctor}: ${data.count} (${data.revenue} руб.)`, { x: 50, y, size: 11, font });
-        y -= lineHeight;
-      }
-    });
+      y -= lineHeight;
+    }
 
     const pdfBytes = await pdfDoc.save();
     return Buffer.from(pdfBytes);
@@ -456,32 +337,42 @@ export class ReportsService {
   async exportInventoryToExcel(): Promise<Buffer> {
     const report = await this.getInventoryReport();
 
+    const operationLabels: Record<string, string> = {
+      income: 'Приход',
+      expense: 'Расход',
+    };
+
     const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Отчёт по складу');
+    const sheet = workbook.addWorksheet('Журнал склада');
 
-    sheet.addRow(['Отчёт по складу']);
+    // Заголовок
+    sheet.addRow(['Журнал движения склада']);
     sheet.addRow([]);
 
-    sheet.addRow(['Общая статистика']);
-    sheet.addRow(['Всего позиций', report.summary.totalItems]);
-    sheet.addRow(['Общая стоимость', report.summary.totalValue]);
-    sheet.addRow(['Низкий остаток', report.summary.lowStockCount]);
-    sheet.addRow([]);
-
-    sheet.addRow(['По типам']);
-    sheet.addRow(['Тип', 'Количество', 'Стоимость']);
-    report.byType.forEach((item) => {
-      sheet.addRow([item.type, item.count, item.value]);
+    // Заголовки таблицы
+    const headerRow = sheet.addRow(['Дата', 'Наименование', 'Операция', 'Кол-во', 'Остаток', 'Причина']);
+    headerRow.font = { bold: true };
+    headerRow.eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
     });
-    sheet.addRow([]);
 
-    if (report.expiring.length > 0) {
-      sheet.addRow(['Истекающие позиции']);
-      sheet.addRow(['Название', 'Количество', 'Срок годности']);
-      report.expiring.forEach((item) => {
-        sheet.addRow([item.name, item.quantity, item.expiryDate]);
-      });
-    }
+    // Данные
+    report.movements.forEach((m) => {
+      const date = new Date(m.date).toLocaleDateString('ru-RU');
+      const operation = operationLabels[m.operationType] || m.operationType;
+      const qty = m.operationType === 'income' ? `+${m.quantity}` : `-${m.quantity}`;
+      sheet.addRow([date, m.itemName, operation, qty, m.quantityAfter, m.reason || '—']);
+    });
+
+    // Автоширина колонок
+    sheet.columns = [
+      { width: 12 },
+      { width: 25 },
+      { width: 12 },
+      { width: 10 },
+      { width: 10 },
+      { width: 25 },
+    ];
 
     const buffer = await workbook.xlsx.writeBuffer();
     return Buffer.from(buffer);
@@ -490,63 +381,60 @@ export class ReportsService {
   async exportInventoryToPdf(): Promise<Buffer> {
     const report = await this.getInventoryReport();
 
-    const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595, 842]);
-    const { font, boldFont } = await this.loadFonts(pdfDoc);
-
-    let y = 800;
-    const lineHeight = 20;
-
-    const typeLabels: Record<string, string> = {
-      medication: 'Медикаменты',
-      consumable: 'Расходные материалы',
-      equipment: 'Оборудование',
+    const operationLabels: Record<string, string> = {
+      income: 'Приход',
+      expense: 'Расход',
     };
 
-    page.drawText('Отчёт по складу', { x: 50, y, size: 18, font: boldFont });
+    const pdfDoc = await PDFDocument.create();
+    // Альбомная ориентация для большей ширины
+    let page = pdfDoc.addPage([842, 595]);
+    const { font, boldFont } = await this.loadFonts(pdfDoc);
+
+    let y = 550;
+    const lineHeight = 18;
+    const colWidths = [80, 250, 80, 70, 70, 180]; // Дата, Наименование, Операция, Кол-во, Остаток, Причина
+    const startX = 40;
+
+    // Заголовок
+    page.drawText('Журнал движения склада', { x: startX, y, size: 16, font: boldFont });
     y -= lineHeight * 2;
 
-    page.drawText('Общая статистика', { x: 50, y, size: 14, font: boldFont });
-    y -= lineHeight;
-    page.drawText(`Всего позиций: ${report.summary.totalItems}`, { x: 50, y, size: 11, font });
-    y -= lineHeight;
-    page.drawText(`Общая стоимость: ${report.summary.totalValue} руб.`, { x: 50, y, size: 11, font });
-    y -= lineHeight;
-    page.drawText(`Низкий остаток: ${report.summary.lowStockCount}`, { x: 50, y, size: 11, font });
-    y -= lineHeight;
-    page.drawText(`Истекает срок: ${report.summary.expiringCount}`, { x: 50, y, size: 11, font });
-    y -= lineHeight * 2;
-
-    page.drawText('По типам', { x: 50, y, size: 14, font: boldFont });
-    y -= lineHeight;
-    report.byType.forEach((item) => {
-      const label = typeLabels[item.type] || item.type;
-      page.drawText(`${label}: ${item.count} поз. (${item.value} руб.)`, { x: 50, y, size: 11, font });
-      y -= lineHeight;
+    // Заголовки таблицы
+    const headers = ['Дата', 'Наименование', 'Операция', 'Кол-во', 'Остаток', 'Причина'];
+    let x = startX;
+    headers.forEach((header, i) => {
+      page.drawText(header, { x, y, size: 10, font: boldFont });
+      x += colWidths[i];
     });
     y -= lineHeight;
 
-    if (report.lowStock.length > 0) {
-      page.drawText('Позиции с низким остатком', { x: 50, y, size: 14, font: boldFont });
-      y -= lineHeight;
-      report.lowStock.forEach((item) => {
-        if (y > 50) {
-          page.drawText(`${item.name}: ${item.quantity}/${item.minQuantity} ${item.unit}`, { x: 50, y, size: 11, font });
-          y -= lineHeight;
-        }
-      });
-      y -= lineHeight;
-    }
+    // Данные таблицы
+    for (const m of report.movements) {
+      if (y < 50) {
+        page = pdfDoc.addPage([842, 595]);
+        y = 550;
+      }
 
-    if (report.expiring.length > 0 && y > 100) {
-      page.drawText('Истекающий срок годности', { x: 50, y, size: 14, font: boldFont });
+      const date = new Date(m.date).toLocaleDateString('ru-RU');
+      const operation = operationLabels[m.operationType] || m.operationType;
+      const qty = m.operationType === 'income' ? `+${m.quantity}` : `-${m.quantity}`;
+      const reason = m.reason || '—';
+
+      x = startX;
+      page.drawText(date, { x, y, size: 9, font });
+      x += colWidths[0];
+      page.drawText(m.itemName, { x, y, size: 9, font });
+      x += colWidths[1];
+      page.drawText(operation, { x, y, size: 9, font });
+      x += colWidths[2];
+      page.drawText(qty, { x, y, size: 9, font });
+      x += colWidths[3];
+      page.drawText(String(m.quantityAfter), { x, y, size: 9, font });
+      x += colWidths[4];
+      page.drawText(reason, { x, y, size: 9, font });
+
       y -= lineHeight;
-      report.expiring.forEach((item) => {
-        if (y > 50) {
-          page.drawText(`${item.name}: ${item.expiryDate}`, { x: 50, y, size: 11, font });
-          y -= lineHeight;
-        }
-      });
     }
 
     const pdfBytes = await pdfDoc.save();

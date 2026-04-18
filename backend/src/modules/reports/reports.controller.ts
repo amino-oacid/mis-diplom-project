@@ -74,33 +74,4 @@ export class ReportsController {
     const report = await this.reportsService.getInventoryReport();
     res.json({ success: true, data: report });
   }
-
-  @Get('revenue')
-  @UseGuards(RolesGuard)
-  @Roles('admin')
-  async getRevenueReport(
-    @Query() filters: ReportFiltersDto,
-    @Res() res: Response,
-  ) {
-    const { startDate, endDate, format } = filters;
-
-    if (format === 'excel') {
-      const buffer = await this.reportsService.exportRevenueToExcel(startDate, endDate);
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename=revenue_${startDate}_${endDate}.xlsx`);
-      res.send(buffer);
-      return;
-    }
-
-    if (format === 'pdf') {
-      const buffer = await this.reportsService.exportRevenueToPdf(startDate, endDate);
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=revenue_${startDate}_${endDate}.pdf`);
-      res.send(buffer);
-      return;
-    }
-
-    const report = await this.reportsService.getRevenueReport(startDate, endDate);
-    res.json({ success: true, data: report });
-  }
 }
