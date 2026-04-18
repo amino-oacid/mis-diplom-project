@@ -43,22 +43,6 @@
   white-space: nowrap;
 }
 
-.status-scheduled {
-  background-color: #3b82f6;
-}
-
-.status-in_progress {
-  background-color: #f59e0b;
-}
-
-.status-completed {
-  background-color: #10b981;
-}
-
-.status-cancelled {
-  background-color: #ef4444;
-}
-
 .appointment-form-page .form-card {
   max-width: 700px;
 }

@@ -123,7 +123,7 @@ export const ReportsPage: React.FC = () => {
                     {appointmentsReport.appointments?.map((appointment, idx) => {
                       const getStatusClass = (status: string): string => {
                         switch (status) {
-                          case 'scheduled': return 'badge-success';
+                          case 'scheduled': return 'badge-info';
                           case 'in_progress': return 'badge-warning';
                           case 'completed': return 'badge-success';
                           case 'cancelled': return 'badge-danger';
