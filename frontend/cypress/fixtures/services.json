@@ -6,8 +6,6 @@
       "name": "Первичный приём терапевта",
       "description": "Первичный приём врача-терапевта",
       "category": "Терапия",
-      "duration": 30,
-      "durationMinutes": 30,
       "price": 2000
     },
     {
@@ -16,8 +14,6 @@
       "name": "Повторный приём терапевта",
       "description": "Повторный приём врача-терапевта",
       "category": "Терапия",
-      "duration": 20,
-      "durationMinutes": 20,
       "price": 1500
     },
     {
@@ -26,8 +22,6 @@
       "name": "УЗИ брюшной полости",
       "description": "Ультразвуковое исследование органов брюшной полости",
       "category": "Диагностика",
-      "duration": 30,
-      "durationMinutes": 30,
       "price": 2500
     },
     {
@@ -36,8 +30,6 @@
       "name": "Общий анализ крови",
       "description": "Клинический анализ крови",
       "category": "Лаборатория",
-      "duration": 10,
-      "durationMinutes": 10,
       "price": 500
     }
   ]

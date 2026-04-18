@@ -21,19 +21,6 @@ export interface User {
   };
 }
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-}
-
-export interface ApiError {
-  status: number;
-  message: string;
-  errors?: Record<string, string[]>;
-}
-
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;

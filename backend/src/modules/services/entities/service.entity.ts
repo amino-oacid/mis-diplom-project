@@ -27,9 +27,6 @@ export class Service {
   @Column({ type: 'varchar', length: 100, nullable: true })
   category: string | null; // категория услуги
 
-  @Column({ type: 'int', name: 'duration_minutes', default: 30 })
-  durationMinutes: number; // длительность услуги в минутах
-
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   price: number; // стоимость услуги
 

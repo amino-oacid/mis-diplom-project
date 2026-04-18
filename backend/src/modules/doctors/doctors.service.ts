@@ -21,7 +21,7 @@ export class DoctorsService {
   async findOne(id: number): Promise<Doctor> {
     const doctor = await this.doctorRepository.findOne({
       where: { id },
-      relations: ['user', 'schedules'],
+      relations: ['user'],
     });
 
     if (!doctor) {

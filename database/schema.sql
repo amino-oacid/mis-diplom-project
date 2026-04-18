@@ -3,7 +3,6 @@ DROP TABLE IF EXISTS inventory_log CASCADE;
 DROP TABLE IF EXISTS prescriptions CASCADE;
 DROP TABLE IF EXISTS appointments CASCADE;
 DROP TABLE IF EXISTS medical_records CASCADE;
-DROP TABLE IF EXISTS schedule CASCADE;
 DROP TABLE IF EXISTS inventory CASCADE;
 DROP TABLE IF EXISTS services CASCADE;
 DROP TABLE IF EXISTS doctors CASCADE;
@@ -15,7 +14,6 @@ DROP TYPE IF EXISTS user_role CASCADE;
 DROP TYPE IF EXISTS appointment_status CASCADE;
 DROP TYPE IF EXISTS gender_type CASCADE;
 DROP TYPE IF EXISTS inventory_type CASCADE;
-DROP TYPE IF EXISTS day_of_week CASCADE;
 
 -- Роли пользователей системы
 CREATE TYPE user_role AS ENUM ('admin', 'doctor');
@@ -38,10 +36,6 @@ CREATE TYPE inventory_type AS ENUM (
     'equipment'     -- Оборудование
 );
 
--- Дни недели для расписания
-CREATE TYPE day_of_week AS ENUM (
-    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
-);
 
 -- Таблица: users (Пользователи системы)
 CREATE TABLE users (
@@ -103,7 +97,6 @@ CREATE TABLE services (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     category VARCHAR(100),
-    duration_minutes INTEGER NOT NULL DEFAULT 30,
     price DECIMAL(10, 2) NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -123,19 +116,6 @@ CREATE TABLE medical_records (
     bad_habits TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Таблица: schedule (Расписание врачей)
-CREATE TABLE schedule (
-    id SERIAL PRIMARY KEY,
-    doctor_id INTEGER NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
-    day_of_week day_of_week NOT NULL,
-    start_time TIME NOT NULL,            
-    end_time TIME NOT NULL,              
-    office_number VARCHAR(20),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(doctor_id, day_of_week)
 );
 
 -- Таблица: appointments (Приёмы)
@@ -222,8 +202,6 @@ CREATE INDEX idx_services_code ON services(code);
 CREATE INDEX idx_services_category ON services(category);
 CREATE INDEX idx_medical_records_patient_id ON medical_records(patient_id);
 CREATE INDEX idx_medical_records_card_number ON medical_records(card_number);
-CREATE INDEX idx_schedule_doctor_id ON schedule(doctor_id);
-CREATE INDEX idx_schedule_day_of_week ON schedule(day_of_week);
 CREATE INDEX idx_appointments_patient_id ON appointments(patient_id);
 CREATE INDEX idx_appointments_doctor_id ON appointments(doctor_id);
 CREATE INDEX idx_appointments_date ON appointments(appointment_date);
@@ -267,8 +245,6 @@ CREATE TRIGGER update_services_updated_at BEFORE UPDATE ON services
 CREATE TRIGGER update_medical_records_updated_at BEFORE UPDATE ON medical_records
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_schedule_updated_at BEFORE UPDATE ON schedule
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_appointments_updated_at BEFORE UPDATE ON appointments
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -280,20 +256,20 @@ CREATE TRIGGER update_inventory_updated_at BEFORE UPDATE ON inventory
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Тестовые услуги клиники
-INSERT INTO services (code, name, description, category, duration_minutes, price) VALUES
-('CONS-001', 'Первичная консультация терапевта', 'Осмотр, сбор анамнеза, назначение обследований', 'Терапия', 30, 2000.00),
-('CONS-002', 'Повторная консультация терапевта', 'Оценка результатов обследований, корректировка лечения', 'Терапия', 20, 1500.00),
-('CONS-003', 'Первичная консультация кардиолога', 'Осмотр, ЭКГ, рекомендации', 'Кардиология', 45, 3500.00),
-('CONS-004', 'Повторная консультация кардиолога', 'Оценка динамики, корректировка терапии', 'Кардиология', 30, 2500.00),
-('CONS-005', 'Первичная консультация невролога', 'Неврологический осмотр, назначения', 'Неврология', 40, 3000.00),
-('CONS-006', 'Повторная консультация невролога', 'Контрольный осмотр', 'Неврология', 25, 2000.00),
-('DIAG-001', 'ЭКГ', 'Электрокардиография в покое', 'Диагностика', 15, 1000.00),
-('DIAG-002', 'УЗИ органов брюшной полости', 'Комплексное ультразвуковое исследование', 'Диагностика', 30, 2500.00),
-('DIAG-003', 'УЗИ щитовидной железы', 'Ультразвуковое исследование щитовидной железы', 'Диагностика', 20, 1500.00),
-('DIAG-004', 'Общий анализ крови', 'Клинический анализ крови с лейкоформулой', 'Лабораторная диагностика', 10, 800.00),
-('DIAG-005', 'Биохимический анализ крови', 'Расширенный биохимический профиль', 'Лабораторная диагностика', 10, 2000.00),
-('PROC-001', 'Внутривенная инъекция', 'Внутривенное введение препарата', 'Процедуры', 15, 500.00),
-('PROC-002', 'Внутримышечная инъекция', 'Внутримышечное введение препарата', 'Процедуры', 10, 300.00),
-('PROC-003', 'Капельница', 'Инфузионная терапия', 'Процедуры', 60, 1500.00),
-('PROC-004', 'Перевязка', 'Перевязка раны', 'Процедуры', 20, 800.00)
+INSERT INTO services (code, name, description, category, price) VALUES
+('CONS-001', 'Первичная консультация терапевта', 'Осмотр, сбор анамнеза, назначение обследований', 'Терапия', 2000.00),
+('CONS-002', 'Повторная консультация терапевта', 'Оценка результатов обследований, корректировка лечения', 'Терапия', 1500.00),
+('CONS-003', 'Первичная консультация кардиолога', 'Осмотр, ЭКГ, рекомендации', 'Кардиология', 3500.00),
+('CONS-004', 'Повторная консультация кардиолога', 'Оценка динамики, корректировка терапии', 'Кардиология', 2500.00),
+('CONS-005', 'Первичная консультация невролога', 'Неврологический осмотр, назначения', 'Неврология', 3000.00),
+('CONS-006', 'Повторная консультация невролога', 'Контрольный осмотр', 'Неврология', 2000.00),
+('DIAG-001', 'ЭКГ', 'Электрокардиография в покое', 'Диагностика', 1000.00),
+('DIAG-002', 'УЗИ органов брюшной полости', 'Комплексное ультразвуковое исследование', 'Диагностика', 2500.00),
+('DIAG-003', 'УЗИ щитовидной железы', 'Ультразвуковое исследование щитовидной железы', 'Диагностика', 1500.00),
+('DIAG-004', 'Общий анализ крови', 'Клинический анализ крови с лейкоформулой', 'Лабораторная диагностика', 800.00),
+('DIAG-005', 'Биохимический анализ крови', 'Расширенный биохимический профиль', 'Лабораторная диагностика', 2000.00),
+('PROC-001', 'Внутривенная инъекция', 'Внутривенное введение препарата', 'Процедуры', 500.00),
+('PROC-002', 'Внутримышечная инъекция', 'Внутримышечное введение препарата', 'Процедуры', 300.00),
+('PROC-003', 'Капельница', 'Инфузионная терапия', 'Процедуры', 1500.00),
+('PROC-004', 'Перевязка', 'Перевязка раны', 'Процедуры', 800.00)
 ON CONFLICT (code) DO NOTHING;

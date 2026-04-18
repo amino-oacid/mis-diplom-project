@@ -10,7 +10,6 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Appointment } from '../../appointments/entities/appointment.entity';
-import { Schedule } from './schedule.entity';
 
 // Doctor - сущность врача
 @Entity('doctors') // В бд таблица doctors
@@ -49,7 +48,4 @@ export class Doctor {
 
   @OneToMany(() => Appointment, (appointment) => appointment.doctor)
   appointments: Appointment[]; // связь с таблицей appointments (1:N)
-
-  @OneToMany(() => Schedule, (schedule) => schedule.doctor)
-  schedules: Schedule[]; // связь с таблицей schedules (1:N)
 }

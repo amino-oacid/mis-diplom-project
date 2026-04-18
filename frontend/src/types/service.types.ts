@@ -4,7 +4,5 @@ export interface Service {
   name: string;
   description?: string;
   category?: string;
-  duration: number;
-  durationMinutes?: number;
   price: number;
 }
