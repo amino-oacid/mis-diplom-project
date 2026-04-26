@@ -30,24 +30,6 @@ export class PatientsService {
       );
     }
 
-    if (search?.lastName) {
-      queryBuilder.andWhere('patient.lastName ILIKE :lastName', {
-        lastName: `%${search.lastName}%`,
-      });
-    }
-
-    if (search?.firstName) {
-      queryBuilder.andWhere('patient.firstName ILIKE :firstName', {
-        firstName: `%${search.firstName}%`,
-      });
-    }
-
-    if (search?.phone) {
-      queryBuilder.andWhere('patient.phone ILIKE :phone', {
-        phone: `%${search.phone}%`,
-      });
-    }
-
     queryBuilder
       .orderBy('patient.lastName', 'ASC')
       .addOrderBy('patient.firstName', 'ASC')

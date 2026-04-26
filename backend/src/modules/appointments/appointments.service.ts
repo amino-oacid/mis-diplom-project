@@ -28,29 +28,28 @@ export class AppointmentsService {
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.doctor', 'doctor')
-      .leftJoinAndSelect('doctor.user', 'user')
+      .leftJoinAndSelect('doctor.user', 'doctorUser')
       .leftJoinAndSelect('appointment.service', 'service');
+
+    if (filters?.search) {
+      queryBuilder.andWhere(
+        '(patient.lastName ILIKE :search OR patient.firstName ILIKE :search OR patient.middleName ILIKE :search OR doctorUser.lastName ILIKE :search OR doctorUser.firstName ILIKE :search OR doctorUser.middleName ILIKE :search)',
+        { search: `%${filters.search}%` },
+      );
+    }
 
     if (filters?.doctorId) {
       queryBuilder.andWhere('appointment.doctorId = :doctorId', { doctorId: filters.doctorId });
-    }
-
-    if (filters?.patientId) {
-      queryBuilder.andWhere('appointment.patientId = :patientId', { patientId: filters.patientId });
     }
 
     if (filters?.status) {
       queryBuilder.andWhere('appointment.status = :status', { status: filters.status });
     }
 
-    if (filters?.date) {
-      queryBuilder.andWhere('appointment.appointmentDate = :date', { date: filters.date });
-    }
-
-    if (filters?.startDate && filters?.endDate) {
-      queryBuilder.andWhere('appointment.appointmentDate BETWEEN :startDate AND :endDate', {
-        startDate: filters.startDate,
-        endDate: filters.endDate,
+    if (filters?.dateFrom && filters?.dateTo) {
+      queryBuilder.andWhere('appointment.appointmentDate BETWEEN :dateFrom AND :dateTo', {
+        dateFrom: filters.dateFrom,
+        dateTo: filters.dateTo,
       });
     }
 

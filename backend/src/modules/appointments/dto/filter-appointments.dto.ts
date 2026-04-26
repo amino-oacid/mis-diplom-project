@@ -10,29 +10,17 @@ export class FilterAppointmentsDto {
   @IsOptional()
   limit?: string;
 
+  @IsString()
+  @IsOptional()
+  search?: string;
+
   @IsNumberString()
   @IsOptional()
   doctorId?: string;
 
-  @IsNumberString()
-  @IsOptional()
-  patientId?: string;
-
   @IsEnum(AppointmentStatus)
   @IsOptional()
   status?: AppointmentStatus;
-
-  @IsString()
-  @IsOptional()
-  date?: string;
-
-  @IsString()
-  @IsOptional()
-  startDate?: string;
-
-  @IsString()
-  @IsOptional()
-  endDate?: string;
 
   @IsString()
   @IsOptional()

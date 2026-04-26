@@ -6,25 +6,6 @@ export class SearchPatientsDto {
   @IsOptional()
   search?: string;
 
-  @IsString()
-  @IsOptional()
-  lastName?: string;
-
-  @IsString()
-  @IsOptional()
-  firstName?: string;
-
-  @IsString()
-  @IsOptional()
-  phone?: string;
-
-  @IsString()
-  @IsOptional()
-  snils?: string;
-
-  @IsString()
-  @IsOptional()
-  insurancePolicy?: string;
 
   @IsOptional()
   @Type(() => Number)
