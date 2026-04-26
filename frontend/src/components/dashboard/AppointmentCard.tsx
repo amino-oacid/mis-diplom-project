@@ -10,7 +10,7 @@ interface AppointmentCardProps {
 const getStatusClass = (status: string): string => {
   switch (status) {
     case 'scheduled':
-      return 'badge-success';
+      return 'badge-info';
     case 'completed':
       return 'badge-success';
     case 'in_progress':
