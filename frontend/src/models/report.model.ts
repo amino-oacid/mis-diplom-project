@@ -27,7 +27,11 @@ export const reportModel = {
   },
 
   async getInventoryReport(params?: ReportParams): Promise<InventoryReport> {
-    const response = await api.get<{ success: boolean; data: InventoryReport }>('/reports/inventory', { params });
+    const queryParams = params ? {
+      startDate: params.dateFrom || undefined,
+      endDate: params.dateTo || undefined,
+    } : undefined;
+    const response = await api.get<{ success: boolean; data: InventoryReport }>('/reports/inventory', { params: queryParams });
     return response.data.data;
   },
 

@@ -13,9 +13,3 @@ export class ReportFiltersDto {
   @IsIn(['excel', 'pdf'], { message: 'Формат должен быть excel или pdf' })
   format?: 'excel' | 'pdf';
 }
-
-export class InventoryReportFiltersDto {
-  @IsOptional()
-  @IsIn(['excel', 'pdf'], { message: 'Формат должен быть excel или pdf' })
-  format?: 'excel' | 'pdf';
-}

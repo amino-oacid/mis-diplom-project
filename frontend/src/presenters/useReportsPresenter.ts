@@ -53,7 +53,7 @@ export const useReportsPresenter = () => {
           break;
 
         case 'inventory':
-          const inventoryData = await reportModel.getInventoryReport();
+          const inventoryData = await reportModel.getInventoryReport(paramsToUse);
           setInventoryReport(inventoryData);
           break;
       }

@@ -133,13 +133,23 @@ export class ReportsService {
     return { total, byStatus, byDoctor, revenue, appointments };
   }
 
-  async getInventoryReport() {
+  async getInventoryReport(startDate?: string, endDate?: string) {
+    // Дефолтные значения: последние 30 дней
+    const now = new Date();
+    const defaultEnd = now.toISOString().split('T')[0];
+    const defaultStart = new Date(now.setDate(now.getDate() - 30)).toISOString().split('T')[0];
+
+    const start = startDate || defaultStart;
+    const end = endDate || defaultEnd;
+
     const [items, logs] = await Promise.all([
       this.inventoryRepository.find(),
       this.inventoryLogRepository
         .createQueryBuilder('log')
         .leftJoinAndSelect('log.inventory', 'inventory')
         .leftJoinAndSelect('log.performer', 'performer')
+        .where('log.performedAt >= :startDate', { startDate: start })
+        .andWhere('log.performedAt <= :endDate', { endDate: `${end} 23:59:59` })
         .orderBy('log.performedAt', 'DESC')
         .limit(100)
         .getMany(),
@@ -334,8 +344,8 @@ export class ReportsService {
     return Buffer.from(pdfBytes);
   }
 
-  async exportInventoryToExcel(): Promise<Buffer> {
-    const report = await this.getInventoryReport();
+  async exportInventoryToExcel(startDate?: string, endDate?: string): Promise<Buffer> {
+    const report = await this.getInventoryReport(startDate, endDate);
 
     const operationLabels: Record<string, string> = {
       income: 'Приход',
@@ -378,8 +388,8 @@ export class ReportsService {
     return Buffer.from(buffer);
   }
 
-  async exportInventoryToPdf(): Promise<Buffer> {
-    const report = await this.getInventoryReport();
+  async exportInventoryToPdf(startDate?: string, endDate?: string): Promise<Buffer> {
+    const report = await this.getInventoryReport(startDate, endDate);
 
     const operationLabels: Record<string, string> = {
       income: 'Приход',
