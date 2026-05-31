@@ -50,3 +50,9 @@ cd backend && npm install && npm run start:dev
 # Фронтенд (порт 3000)
 cd frontend && npm install && npm run dev
 ```
+
+## Деплой на сервер
+
+- IP адрес сервера 158.160.235.143
+- Frontend http://158.160.235.143:8080
+- Backend http://158.160.235.143:3001
